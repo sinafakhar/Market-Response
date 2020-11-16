@@ -61,7 +61,12 @@ ggplot(pie_share, aes(x = "", y = sales_percent, fill = brands)) +
  
 odd_numbers= data%>% filter(REXONASales>200)
 
+
+
+   
 ####### Evolution of sales in each retailer
+
+
 
 data_albert= data%>% filter(Chain=="ALBERT HEIJN")%>%dplyr::select(1:10)
 data_albert$WEEK=(seq(1:nrow(data_albert)))
@@ -168,6 +173,30 @@ k= data_value_final%>%summarise(mean(dove_value))
 
 b+c+d+e+f+g+h+k #Sanity check to show sum of value shares is 1
 
+###Evolution in total market 
+data_value_final$WEEK= gsub("W","",data$WEEK)
+data_value_final$WEEK=as.numeric(data_value_final$WEEK)
+evolution=data_value_final%>% group_by(WEEK)%>% summarise(median(rexona_value))
+colnames(evolution)=c("Week","Rexona_Market_Share")
+ggplot(evolution, aes(x=Week)) + 
+  geom_line(aes(y = Rexona_Market_Share), color = "darkred")  
+data$sum= rowSums(data[3:10])
+
+summarize = data%>%dplyr::select(c(2,51))%>%group_by(WEEK)%>% summarise(Score = sum(sum))
+summarize$WEEK=gsub("W","",summarize$WEEK)
+summarize$WEEK=as.numeric(summarize$WEEK)
+colnames(summarize)=c("Week","Market_Size_Volume")
+
+ggplot(summarize, aes(x=Week)) + 
+  geom_line(aes(y = Market_Size_Volume), color = "darkred")  
+
+##For total sales of rexona
+# data$WEEK=gsub("W","",data$WEEK)
+# data$WEEK=as.numeric(data$WEEK)
+# evolution_1=data%>% group_by(WEEK)%>% summarise(mean(rexona_value))
+# colnames(evolution_1)=c("WEEK","rexona_value")
+# ggplot(evolution_1, aes(x=WEEK)) + 
+#   geom_line(aes(y = rexona_value), color = "darkred")
 
 
 #How does the brand's price level and promotional support levels compare to the
@@ -178,26 +207,26 @@ b+c+d+e+f+g+h+k #Sanity check to show sum of value shares is 1
 #############Price
 data_price= cbind(data[1:2],data[19:26]-data[11:18])
 colnames(data_price)[9]='a8X4RPrice'
-data_price%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(REXONARPrice)) 
+data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONARPrice)) 
 data_price%>% summarise(mean(REXONARPrice)) 
 
-data_price%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(DOVERPrice))
+data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(DOVERPrice))
 data_price%>%summarise(mean(DOVERPrice)) 
 
-data_price%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(FARPrice)) 
+data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(FARPrice)) 
 data_price%>% select(3:10)%>%summarise(mean(FARPrice)) 
 
-data_price%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(NIVEARPrice)) 
+data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(NIVEARPrice)) 
 data_price%>% select(3:10)%>%summarise(mean(NIVEARPrice)) 
 
-data_price%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(SANEXRPrice))
+data_price%>% group_by(Chain)%>%dplyr::select(3:10)%>%summarise(mean(SANEXRPrice))
 data_price%>% select(3:10)%>%summarise(mean(SANEXRPrice))
 
 
-data_price%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(VOGUERPrice))
+data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(VOGUERPrice))
 data_price%>% select(3:10)%>%summarise(mean(VOGUERPrice))
 
-data_price%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(a8X4RPrice))
+data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(a8X4RPrice))
 data_price%>% select(3:10)%>%summarise(mean(a8X4RPrice)) 
 
 
@@ -209,25 +238,25 @@ colnames(data_promo)[8]='a8X4DISP'
 colnames(data_promo)[16]='a8X4FEAT'
 colnames(data_promo)[24]='a8X4D+F'
 
-data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(REXONADISP)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONADISP)) 
 data_promo%>% select(3:10)%>%summarise(mean(REXONADISP)) 
 
-data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(DOVEDISP)) 
+data_promo%>% group_by(Chain)%>%dplyr::select(3:10)%>%summarise(mean(DOVEDISP)) 
 data_promo%>% select(3:10)%>%summarise(mean(DOVEDISP)) 
 
-data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(FADISP))
+data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(FADISP))
 data_promo%>% select(3:10)%>%summarise(mean(FADISP)) 
 
-data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(NIVEADISP)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(NIVEADISP)) 
 data_promo%>% select(3:10)%>%summarise(mean(NIVEADISP)) 
 
-data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(SANEXDISP))
+data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(SANEXDISP))
 data_promo%>% select(3:10)%>%summarise(mean(SANEXDISP)) 
 
 data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(VOGUEDISP))
 data_promo%>% select(3:10)%>%summarise(mean(VOGUEDISP)) 
 
-data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(a8X4DISP)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(a8X4DISP)) 
 data_promo%>% select(3:10)%>%summarise(mean(a8X4DISP)) 
 
 #####FEATURE
