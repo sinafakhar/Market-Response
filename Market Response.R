@@ -90,7 +90,7 @@ data_total%>%filter(Chain=='EDAH')%>%ggplot( aes(x=WEEK, y=REXONASales)) +
   geom_line()
 data_total%>%filter(Chain=='SUPER DE BOER')%>%ggplot( aes(x=WEEK, y=REXONASales)) +
   geom_line()
-
+####### 
 ####### Evolution of market share in each retailer
 
 data_total_n= data_total%>%dplyr:: select(c(-1,-2))
@@ -137,7 +137,37 @@ View(odd_numbers)
 chart.Correlation(data[,c(-1,-2)], histogram=TRUE, pch=19)
 
 #How does this market share differ between retailers?
-data_share%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(REXONASales)) 
+data_share%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONASales))  #Volume
+
+
+data$rexona_value = (data$REXONASales*data$REXONAPrice)
+data$nivea_value = (data$NIVEASales*data$NIVEAPrice)
+data$dove_value = (data$DOVESales*data$DOVEPrice)
+data$fa_value = (data$FASales*data$FAPrice)
+data$vogue_value = (data$VOGUESales*data$VOGUEPrice)
+data$axe_value = (data$AXESales*data$AXEPrice)
+data$a8X4_value = (data$`8X4Sales`*data$`8X4Price`)
+data$sanex_value = (data$SANEXSales*data$SANEXPrice)
+
+
+## Calculations for market value 
+data_value= round(data[51:58]/rowSums(data[51:58]),2)  
+data_value_final= cbind(data[1:2],data_value)
+data_value_final%>% group_by(Chain)%>%summarise(mean(rexona_value)) 
+
+b=data_value_final%>%summarise(mean(rexona_value))
+c=data_value_final%>%summarise(mean(axe_value))
+d= data_value_final%>%summarise(mean(nivea_value))
+e= data_value_final%>%summarise(mean(fa_value))
+f= data_value_final%>%summarise(mean(a8X4_value))
+g= data_value_final%>%summarise(mean(vogue_value))
+h= data_value_final%>%summarise(mean(sanex_value))
+k= data_value_final%>%summarise(mean(dove_value))
+
+
+
+b+c+d+e+f+g+h+k #Sanity check to show sum of value shares is 1
+
 
 
 #How does the brand's price level and promotional support levels compare to the
