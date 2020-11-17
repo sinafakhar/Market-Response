@@ -391,16 +391,16 @@ data1 = cbind(data_date,test,data_c)
 
 View(data1)
 #######PRICE WAR
+colors <- c("Rexona" = "darkred", "Dove" = "steelblue")
 ggplot(data1, aes(x=WEEK)) + 
   geom_line(aes(y = REXONAPrice), color = "darkred") + 
-  geom_line(aes(y = DOVEPrice), color="steelblue", linetype="twodash")+
-  geom_line(aes(y = SANEXPrice), color = "black")+
-  geom_line(aes(y = NIVEAPrice), color = "#0073C2FF")+
-  geom_line(aes(y = FAPrice), color = "#EFC000FF")+
-  geom_line(aes(y = AXEPrice), color = "#868686FF")+
-  geom_line(aes(y = `8X4Price`), color = "#CD534CFF")+
-  geom_line(aes(y = VOGUEPrice), color = "#CC79A7")
-
+  geom_line(aes(y = DOVEPrice), color="steelblue", linetype="twodash")+ 
+  labs(x = "Weeks",  y = "Price", color = "Legend")   ## Legend
+  # geom_line(aes(y = NIVEAPrice), color = "#0073C2FF")+
+  # geom_line(aes(y = FAPrice), color = "#EFC000FF")+
+  # geom_line(aes(y = AXEPrice), color = "#868686FF")+
+  # geom_line(aes(y = `8X4Price`), color = "#CD534CFF")+
+  # geom_line(aes(y = VOGUEPrice), color = "#CC79A7")
 
 
 cormat<- rcorr(as.matrix(data1[,11:20]))  #This shows the main price wars is for DOVE, VOGUE,SANEX
