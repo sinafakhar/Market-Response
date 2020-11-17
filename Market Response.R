@@ -13,6 +13,8 @@ library(gpairs)
 library(MASS)
 library(lmtest)
 library(caret)
+library(MLme)
+library(MLmetrics)
 data = read_excel("Data.xls")
 str(data)
 sum(is.na(data))
@@ -139,7 +141,6 @@ View(odd_numbers)
 
 
 
-chart.Correlation(data[,c(-1,-2)], histogram=TRUE, pch=19)
 
 #How does this market share differ between retailers?
 data_share%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONASales))  #Volume
@@ -435,7 +436,6 @@ flattenCorrMatrix(cormat$r, cormat$P)
 
 ############################## MODELS##########################################
 
-chart.Correlation(data1[2:10], histogram=TRUE, pch=19)  # Transforing is necessary 
 
 data1_log= log(data1[,c(-1,-2)])
 data1_log= cbind(data1_log[1:8],data1[11:50])
@@ -458,6 +458,8 @@ training.samples <- data1_scaled$REXONASales%>%
   createDataPartition(p = 0.8, list = FALSE)
 train.data  <- data1[training.samples, ]
 test.data <- data1[-training.samples, ]
+chart.Correlation(train.data[,c(6,14,29,45,37,34,19)], histogram=TRUE, pch=19)  # Transforing is necessary 
+
 m1 = lm(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,train.data) #R2=0.77
 summary(m1)
 coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
@@ -465,24 +467,36 @@ coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
 
 #Multicolinearity test 
 car::vif(m1)
-cormat<- rcorr(as.matrix(train.data[,c("REXONAPrice","VOGUEPrice",'SANEXFEAT')]))  #This shows the main competitors is AXE
-flattenCorrMatrix <- function(cormat, pmat) {
-  ut <- upper.tri(cormat)
-  data.frame(
-    row = rownames(cormat)[row(cormat)[ut]],
-    column = rownames(cormat)[col(cormat)[ut]],
-    cor  =(cormat)[ut],
-    p = pmat[ut]
-  )
-}
-
-flattenCorrMatrix(cormat$r, cormat$P)
+  cormat<- rcorr(as.matrix(train.data[,c("REXONADISP","REXONAFEAT",
+                                         'REXONADF','REXONADF','REXONAPrice',
+                                         'DOVEPrice','AXEDISP')]))  
+  flattenCorrMatrix <- function(cormat, pmat) {
+    ut <- upper.tri(cormat)
+    data.frame(
+      row = rownames(cormat)[row(cormat)[ut]],
+      column = rownames(cormat)[col(cormat)[ut]],
+      cor  =(cormat)[ut],
+      p = pmat[ut]
+    )
+  }
+  
+  flattenCorrMatrix(cormat$r, cormat$P)
 #Heterosedasticity test 
+gqtest(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,data=train.data)  
+  
 bptest(m1)
 train.data$resi <- m1$residuals
 ggplot(data = train.data, aes(y = resi, x = REXONASales)) + geom_point(col = 'blue') + geom_abline(slope = 0)
+# Out of sample performance
+predictions <- m1 %>% predict(test.data)
+data.frame(
+  RMSE = RMSE(predictions, test.data$REXONASales),
+  R2 = R2(predictions, test.data$REXONASales)
+)
+MAPE(predictions,test.data$REXONASales)
+
 #########Multiplicative model####################
-m2 = lm(log(REXONASales+2)~log(REXONADISP+2)+log(REXONAFEAT+2)+log(REXONADF+2)+log(AXEDISP+2),data1_scaled) #R2=0.62
+m2 = lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONAPrice),train.data) #R2=0.72
 
 
 
