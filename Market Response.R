@@ -211,101 +211,100 @@ data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONARPri
 data_price%>% summarise(mean(REXONARPrice)) 
 
 data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(DOVERPrice))
-data_price%>%summarise(mean(DOVERPrice)) 
+data_price%>%dplyr::select(3:10)%>%summarise(mean(DOVERPrice)) 
 
 data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(FARPrice)) 
-data_price%>% select(3:10)%>%summarise(mean(FARPrice)) 
+data_price%>% summarise(mean(FARPrice)) 
 
 data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(NIVEARPrice)) 
-data_price%>% select(3:10)%>%summarise(mean(NIVEARPrice)) 
+data_price%>% summarise(mean(NIVEARPrice)) 
 
 data_price%>% group_by(Chain)%>%dplyr::select(3:10)%>%summarise(mean(SANEXRPrice))
-data_price%>% select(3:10)%>%summarise(mean(SANEXRPrice))
+data_price%>% summarise(mean(SANEXRPrice))
 
 
 data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(VOGUERPrice))
-data_price%>% select(3:10)%>%summarise(mean(VOGUERPrice))
+data_price%>%summarise(mean(VOGUERPrice))
 
 data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(a8X4RPrice))
-data_price%>% select(3:10)%>%summarise(mean(a8X4RPrice)) 
+data_price%>%summarise(mean(a8X4RPrice)) 
 
 
 ###############Promotion
 #####DISPLAY
-colnames(data_promo)
 data_promo= cbind(data[1:2],data[27:50])
 colnames(data_promo)[8]='a8X4DISP'
 colnames(data_promo)[16]='a8X4FEAT'
 colnames(data_promo)[24]='a8X4D+F'
 
 data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONADISP)) 
-data_promo%>% select(3:10)%>%summarise(mean(REXONADISP)) 
+data_promo%>% summarise(mean(REXONADISP)) 
 
 data_promo%>% group_by(Chain)%>%dplyr::select(3:10)%>%summarise(mean(DOVEDISP)) 
-data_promo%>% select(3:10)%>%summarise(mean(DOVEDISP)) 
+data_promo%>%summarise(mean(DOVEDISP)) 
 
 data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(FADISP))
-data_promo%>% select(3:10)%>%summarise(mean(FADISP)) 
+data_promo%>% summarise(mean(FADISP)) 
 
 data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(NIVEADISP)) 
-data_promo%>% select(3:10)%>%summarise(mean(NIVEADISP)) 
+data_promo%>%summarise(mean(NIVEADISP)) 
 
 data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(SANEXDISP))
-data_promo%>% select(3:10)%>%summarise(mean(SANEXDISP)) 
+data_promo%>% summarise(mean(SANEXDISP)) 
 
-data_promo%>% group_by(Chain)%>% select(3:10)%>%summarise(mean(VOGUEDISP))
-data_promo%>% select(3:10)%>%summarise(mean(VOGUEDISP)) 
+data_promo%>% group_by(Chain)%>% summarise(mean(VOGUEDISP))
+data_promo%>% summarise(mean(VOGUEDISP)) 
 
 data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(a8X4DISP)) 
-data_promo%>% select(3:10)%>%summarise(mean(a8X4DISP)) 
+data_promo%>% summarise(mean(a8X4DISP)) 
 
 #####FEATURE
 
 
 
-data_promo%>% group_by(Chain)%>% select(11:19)%>%summarise(mean(REXONAFEAT)) 
-data_promo%>% select(11:19)%>%summarise(mean(REXONAFEAT)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(REXONAFEAT)) 
+data_promo%>% summarise(mean(REXONAFEAT)) 
 
-data_promo%>% group_by(Chain)%>% select(11:19)%>%summarise(mean(DOVEFEAT)) 
-data_promo%>% select(11:19)%>%summarise(mean(DOVEFEAT)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(DOVEFEAT)) 
+data_promo%>%summarise(mean(DOVEFEAT)) 
 
-data_promo%>% group_by(Chain)%>% select(11:19)%>%summarise(mean(FAFEAT))
-data_promo%>% select(11:19)%>%summarise(mean(FAFEAT)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(FAFEAT))
+data_promo%>% summarise(mean(FAFEAT)) 
 
-data_promo%>% group_by(Chain)%>% select(11:19)%>%summarise(mean(NIVEAFEAT)) 
-data_promo%>% select(11:19)%>%summarise(mean(NIVEAFEAT)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(NIVEAFEAT)) 
+data_promo%>% summarise(mean(NIVEAFEAT)) 
 
-data_promo%>% group_by(Chain)%>% select(11:19)%>%summarise(mean(SANEXFEAT))
-data_promo%>% select(11:19)%>%summarise(mean(SANEXFEAT)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(SANEXFEAT))
+data_promo%>% summarise(mean(SANEXFEAT)) 
 
-data_promo%>% group_by(Chain)%>% select(11:19)%>%summarise(mean(VOGUEFEAT))
-data_promo%>% select(11:19)%>%summarise(mean(VOGUEFEAT)) 
+data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(VOGUEFEAT))
+data_promo%>% summarise(mean(VOGUEFEAT)) 
 
-data_promo%>% group_by(Chain)%>% select(11:19)%>%summarise(mean(a8X4FEAT)) 
-data_promo%>% select(11:19)%>%summarise(mean(a8X4FEAT))
+data_promo%>% group_by(Chain)%>%dplyr::select(11:18)%>%summarise(mean(a8X4FEAT)) 
+data_promo%>% summarise(mean(a8X4FEAT))
 
 ### DISP AND FEATURE 
 
-data_promo%>% group_by(Chain)%>% select(43:50)%>%summarise(mean(REXONAFEAT)) 
-data_promo%>% select(43:50)%>%summarise(mean(REXONAFEAT)) 
+data_promo%>% group_by(Chain)%>%summarise(mean(REXONADF)) 
+data_promo%>% summarise(mean(REXONADF)) 
 
-data_promo%>% group_by(Chain)%>% select(43:50)%>%summarise(mean(DOVEFEAT)) 
-data_promo%>% select(43:50)%>%summarise(mean(DOVEFEAT)) 
+data_promo%>% group_by(Chain)%>%summarise(mean(DOVEDF)) 
+data_promo%>% summarise(mean(DOVEDF)) 
 
-data_promo%>% group_by(Chain)%>% select(43:50)%>%summarise(mean(FAFEAT))
-data_promo%>% select(43:50)%>%summarise(mean(FAFEAT)) 
+data_promo%>% group_by(Chain)%>%summarise(mean(FADF))
+data_promo%>% summarise(mean(FADF)) 
 
-data_promo%>% group_by(Chain)%>% select(43:50)%>%summarise(mean(NIVEAFEAT)) 
-data_promo%>% select(43:50)%>%summarise(mean(NIVEAFEAT)) 
+data_promo%>% group_by(Chain)%>%summarise(mean(NIVEADF)) 
+data_promo%>% summarise(mean(NIVEADF)) 
 
-data_promo%>% group_by(Chain)%>% select(43:50)%>%summarise(mean(SANEXFEAT))
-data_promo%>% select(43:50)%>%summarise(mean(SANEXFEAT)) 
+data_promo%>% group_by(Chain)%>%summarise(mean(SANEXDF))
+data_promo%>% summarise(mean(SANEXDF)) 
 
-data_promo%>% group_by(Chain)%>% select(43:50)%>%summarise(mean(VOGUEFEAT))
-data_promo%>% select(43:50)%>%summarise(mean(VOGUEFEAT)) 
+data_promo%>% group_by(Chain)%>% summarise(mean(VOGUEDF))
+data_promo%>% summarise(mean(VOGUEDF)) 
 
-data_promo%>% group_by(Chain)%>% select(43:50)%>%summarise(mean(a8X4FEAT)) 
-data_promo%>% select(43:50)%>%summarise(mean(a8X4FEAT))
+data_promo%>% group_by(Chain)%>% summarise(mean(a8X4DF)) 
+data_promo%>% summarise(mean(a8X4DF))
 
 #Can you visually detect evidence of a price war among the brands and/or
 #supermarkets? If yes, explain how you got to that conclusion.
