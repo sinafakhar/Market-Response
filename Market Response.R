@@ -132,8 +132,8 @@ rexo_std= sd(data$REXONADISP)
 odd_numbers= data%>% filter(REXONADISP>rexo_mean+(3*(rexo_std)) |REXONADISP< rexo_mean-(1*(rexo_std)))
 View(odd_numbers)
 
-rexo_mean=mean(data$REXONADISP)
-rexo_std= sd(data$REXONADISP)
+rexo_mean=mean(data$REXONAFEAT)
+rexo_std= sd(data$REXONAFEAT)
 odd_numbers= data%>% filter(REXONAFEAT>rexo_mean+(3*(rexo_std)) |REXONAFEAT< rexo_mean-(1*(rexo_std)))
 View(odd_numbers)
 
@@ -416,8 +416,8 @@ flattenCorrMatrix <- function(cormat, pmat) {
 
 flattenCorrMatrix(cormat$r, cormat$P)
 
-
-cormat<- rcorr(as.matrix(data_share[,3:10]))  #This shows the main competitors is AXE
+market_share_albert = data_share%>% filter(Chain=="ALBERT HEIJN")
+cormat<- rcorr(as.matrix(market_share_albert[,3:10]))  #This shows the main competitors is AXE
 flattenCorrMatrix <- function(cormat, pmat) {
   ut <- upper.tri(cormat)
   data.frame(
@@ -461,8 +461,7 @@ test.data <- data1[-training.samples, ]
 m1 = lm(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,train.data) #R2=0.77
 summary(m1)
 coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
-         ylab= "Market share of REXONA",xlab= 'Association with REXONA market share')
-
+         ylab= "Variables",xlab= 'Association with Rexona market share')
 
 #Multicolinearity test 
 car::vif(m1)
