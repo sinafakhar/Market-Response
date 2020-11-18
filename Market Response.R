@@ -18,9 +18,7 @@ library(MLmetrics)
 data = read_excel("Data.xls")
 str(data)
 sum(is.na(data))
-# skim(data) #Choosing ###Rexona### as market leader 
-# DataExplorer::create_report(data) 
-by(data$REXONASales,data$Chain,mean)
+
 # What is the market share of the brand, in value and in volume?
 
 ##### Market shares in Chains 
