@@ -7,7 +7,7 @@ library(DataExplorer)
 library(dplyr)
 library(Hmisc)
 library(corrplot)
-library(PerformanceAnalytics)
+librby(data$REXONASales,data$Chain,mean)ary(PerformanceAnalytics)
 library(coefplot)
 library(gpairs)
 library(MASS)
@@ -20,8 +20,7 @@ str(data)
 sum(is.na(data))
 # skim(data) #Choosing ###Rexona### as market leader 
 # DataExplorer::create_report(data) 
-
-
+by(data$REXONASales,data$Chain,mean)
 # What is the market share of the brand, in value and in volume?
 
 ##### Market shares in Chains 
@@ -191,121 +190,14 @@ colnames(summarize)=c("Week","Market_Size_Volume")
 ggplot(summarize, aes(x=Week)) + 
   geom_line(aes(y = Market_Size_Volume), color = "darkred")  
 
-##For total sales of rexona
-# data$WEEK=gsub("W","",data$WEEK)
-# data$WEEK=as.numeric(data$WEEK)
-# evolution_1=data%>% group_by(WEEK)%>% summarise(mean(rexona_value))
-# colnames(evolution_1)=c("WEEK","rexona_value")
-# ggplot(evolution_1, aes(x=WEEK)) + 
-#   geom_line(aes(y = rexona_value), color = "darkred")
 
 
 #How does the brand's price level and promotional support levels compare to the
 #levels observed with competing brands? Are the insights retailer specific?
 
-
-
-#############Price
-data_price= cbind(data[1:2],data[19:26]-data[11:18])
-colnames(data_price)[9]='a8X4RPrice'
-data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONARPrice)) 
-data_price%>% summarise(mean(REXONARPrice)) 
-
-data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(DOVERPrice))
-data_price%>%dplyr::select(3:10)%>%summarise(mean(DOVERPrice)) 
-
-data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(FARPrice)) 
-data_price%>% summarise(mean(FARPrice)) 
-
-data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(NIVEARPrice)) 
-data_price%>% summarise(mean(NIVEARPrice)) 
-
-data_price%>% group_by(Chain)%>%dplyr::select(3:10)%>%summarise(mean(SANEXRPrice))
-data_price%>% summarise(mean(SANEXRPrice))
-
-
-data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(VOGUERPrice))
-data_price%>%summarise(mean(VOGUERPrice))
-
-data_price%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(a8X4RPrice))
-data_price%>%summarise(mean(a8X4RPrice)) 
-
-
-###############Promotion
-#####DISPLAY
-data_promo= cbind(data[1:2],data[27:50])
-colnames(data_promo)[8]='a8X4DISP'
-colnames(data_promo)[16]='a8X4FEAT'
-colnames(data_promo)[24]='a8X4D+F'
-
-data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(REXONADISP)) 
-data_promo%>% summarise(mean(REXONADISP)) 
-
-data_promo%>% group_by(Chain)%>%dplyr::select(3:10)%>%summarise(mean(DOVEDISP)) 
-data_promo%>%summarise(mean(DOVEDISP)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(FADISP))
-data_promo%>% summarise(mean(FADISP)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(NIVEADISP)) 
-data_promo%>%summarise(mean(NIVEADISP)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(SANEXDISP))
-data_promo%>% summarise(mean(SANEXDISP)) 
-
-data_promo%>% group_by(Chain)%>% summarise(mean(VOGUEDISP))
-data_promo%>% summarise(mean(VOGUEDISP)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(3:10)%>%summarise(mean(a8X4DISP)) 
-data_promo%>% summarise(mean(a8X4DISP)) 
-
-#####FEATURE
-
-
-
-data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(REXONAFEAT)) 
-data_promo%>% summarise(mean(REXONAFEAT)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(DOVEFEAT)) 
-data_promo%>%summarise(mean(DOVEFEAT)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(FAFEAT))
-data_promo%>% summarise(mean(FAFEAT)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(NIVEAFEAT)) 
-data_promo%>% summarise(mean(NIVEAFEAT)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(SANEXFEAT))
-data_promo%>% summarise(mean(SANEXFEAT)) 
-
-data_promo%>% group_by(Chain)%>% dplyr::select(11:18)%>%summarise(mean(VOGUEFEAT))
-data_promo%>% summarise(mean(VOGUEFEAT)) 
-
-data_promo%>% group_by(Chain)%>%dplyr::select(11:18)%>%summarise(mean(a8X4FEAT)) 
-data_promo%>% summarise(mean(a8X4FEAT))
-
-### DISP AND FEATURE 
-
-data_promo%>% group_by(Chain)%>%summarise(mean(REXONADF)) 
-data_promo%>% summarise(mean(REXONADF)) 
-
-data_promo%>% group_by(Chain)%>%summarise(mean(DOVEDF)) 
-data_promo%>% summarise(mean(DOVEDF)) 
-
-data_promo%>% group_by(Chain)%>%summarise(mean(FADF))
-data_promo%>% summarise(mean(FADF)) 
-
-data_promo%>% group_by(Chain)%>%summarise(mean(NIVEADF)) 
-data_promo%>% summarise(mean(NIVEADF)) 
-
-data_promo%>% group_by(Chain)%>%summarise(mean(SANEXDF))
-data_promo%>% summarise(mean(SANEXDF)) 
-
-data_promo%>% group_by(Chain)%>% summarise(mean(VOGUEDF))
-data_promo%>% summarise(mean(VOGUEDF)) 
-
-data_promo%>% group_by(Chain)%>% summarise(mean(a8X4DF)) 
-data_promo%>% summarise(mean(a8X4DF))
+##Price Display Feature Feature&Display
+a= aggregate (data[,43:50],list(data$Chain),mean)
+colMeans(a[,2:8])
 
 #Can you visually detect evidence of a price war among the brands and/or
 #supermarkets? If yes, explain how you got to that conclusion.
@@ -464,6 +356,8 @@ m1 = lm(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP
 summary(m1)
 coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
          ylab= "Variables",xlab= 'Association with Rexona market share')
+plot(m1)
+
 
 #Multicolinearity test 
 car::vif(m1)
@@ -497,10 +391,13 @@ MAPE(predictions,test.data$REXONASales)
 
 #########Multiplicative model####################
 m2 = lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONAPrice),train.data) #R2=0.72
-
-
-
 summary(m2)
+
+
+
+
+
+
 
 ############  Range Constrainst 
 m2 = lm(log(1/(REXONASales+2))~log(1/(REXONADISP+2))+log(1/(REXONAFEAT+2))+log(1/(REXONADF+2))+log(1/(AXEDISP+2)),data1_scaled) #R2=0.62
