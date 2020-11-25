@@ -350,6 +350,28 @@ chart.Correlation(train.data[,c(6,14,29,45,37,34,19)], histogram=TRUE, pch=19)  
 
 m1 = lm(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,train.data) #R2=0.77
 summary(m1)
+
+RSS <- c(crossprod(m1$residuals))
+
+MSE <- RSS / length(m1$residuals)
+
+  
+RMSE1 <- sqrt(MSE)
+
+
+sig2 <- RSS / m1$df.residual
+
+predictions1 <- m1 %>% predict(train.data)
+
+data.frame(
+  RMSE = RMSE(predictions1, train.data$REXONASales),
+  R2 = R2(predictions1, train.data$REXONASales)
+)
+MAPE(predictions1,train.data$REXONASales)
+
+
+
+
 coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
          ylab= "Variables",xlab= 'Association with Rexona market share')
 plot(m1)
@@ -386,12 +408,23 @@ data.frame(
 )
 MAPE(predictions,test.data$REXONASales)
 
+
+
+
 #########Multiplicative model####################
 m2 = lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONAPrice),train.data) #R2=0.72
 summary(m2)
 
 lnsales = -1.3196 + 1.1117 * log(REXONADISP + 1) -1.4443 * log(REXONAFEAT + 1) +
   2.5353 * log(REXONADF + 1) -0.6392 * log(AXEDISP + 1) + 0.9476 * log(DOVEPrice) -1.4025 * log(REXONAPrice)
+
+coefplot(m2, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+         ylab= "Variables",xlab= 'Association with Rexona market share')
+
+
+#Heterosedasticity test 
+gqtest(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONAPrice),data=train.data)
+
 
 train.data <- train.data %>%
   mutate(lnsales = -1.3196 + 1.1117 * log(REXONADISP + 1) -1.4443 * log(REXONAFEAT + 1) +
@@ -478,9 +511,21 @@ MAPE(predictions,test.data$REXONASales)
 m3 = lm(log(REXONASales)~ REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,train.data) #R2=0.77
 summary(m3)
 
+
+
+coefplot(m3, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+         ylab= "Variables",xlab= 'Association with Rexona market share')
+
+
+#Heterosedasticity test 
+gqtest(log(REXONASales)~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,data=train.data)
+
+
+
 train.data <- train.data %>%
   mutate(lnsales_2 = -1.12278 + 0.75306 * REXONADISP -0.72086 * REXONAFEAT +
            1.83470 * REXONADF -0.76310 * REXONAPrice + 0.51854* DOVEPrice -0.44669 * AXEDISP)
+
 
 train.data <- train.data %>%
   mutate(predicted_sales_2 = exp(1)^lnsales_2)
