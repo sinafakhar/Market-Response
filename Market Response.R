@@ -344,15 +344,34 @@ gpairs(data1_log[2:9])
 gpairs(data1_scaled_log[1:8])
 
 # Split the data into training and test set
-set.seed(123)
-training.samples <- data1_scaled$REXONASales%>%
-  createDataPartition(p = 0.8, list = FALSE)
-train.data  <- data1[training.samples, ]
-test.data <- data1[-training.samples, ]
+train.data  <- data1[1:100, ]
+test.data <- data1[101:124, ]
 chart.Correlation(train.data[,c(6,14,29,45,37,34,19)], histogram=TRUE, pch=19)  # Transforing is necessary 
 
 m1 = lm(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,train.data) #R2=0.77
 summary(m1)
+
+RSS <- c(crossprod(m1$residuals))
+
+MSE <- RSS / length(m1$residuals)
+
+  
+RMSE1 <- sqrt(MSE)
+
+
+sig2 <- RSS / m1$df.residual
+
+predictions1 <- m1 %>% predict(train.data)
+
+data.frame(
+  RMSE = RMSE(predictions1, train.data$REXONASales),
+  R2 = R2(predictions1, train.data$REXONASales)
+)
+MAPE(predictions1,train.data$REXONASales)
+
+
+
+
 coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
          ylab= "Variables",xlab= 'Association with Rexona market share')
 plot(m1)
@@ -389,9 +408,66 @@ data.frame(
 )
 MAPE(predictions,test.data$REXONASales)
 
+
+
+
 #########Multiplicative model####################
 m2 = lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONAPrice),train.data) #R2=0.72
 summary(m2)
+
+lnsales = -1.3196 + 1.1117 * log(REXONADISP + 1) -1.4443 * log(REXONAFEAT + 1) +
+  2.5353 * log(REXONADF + 1) -0.6392 * log(AXEDISP + 1) + 0.9476 * log(DOVEPrice) -1.4025 * log(REXONAPrice)
+
+coefplot(m2, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+         ylab= "Variables",xlab= 'Association with Rexona market share')
+
+
+#Heterosedasticity test 
+gqtest(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONAPrice),data=train.data)
+
+
+train.data <- train.data %>%
+  mutate(lnsales = -1.3196 + 1.1117 * log(REXONADISP + 1) -1.4443 * log(REXONAFEAT + 1) +
+           2.5353 * log(REXONADF + 1) -0.6392 * log(AXEDISP + 1) + 0.9476 * log(DOVEPrice) -1.4025 * log(REXONAPrice))
+
+train.data <- train.data %>%
+  mutate(predicted_sales = exp(1) ^ lnsales)
+
+train.data <- train.data %>%
+  mutate(se = (REXONASales - predicted_sales)^2)
+
+train.data <- train.data %>%
+  mutate(ape = abs((REXONASales - predicted_sales)/REXONASales))
+
+mape_train = sum(train.data$ape)/length(train.data$ape)
+mape_train
+
+rmse_train <- sqrt(sum(train.data$se)/length(train.data$se))
+rmse_train
+
+cor(train.data$REXONASales,train.data$predicted_sales)^2
+
+
+test.data <- test.data %>%
+  mutate(lnsales = -1.3196 + 1.1117 * log(REXONADISP + 1) -1.4443 * log(REXONAFEAT + 1) +
+           2.5353 * log(REXONADF + 1) -0.6392 * log(AXEDISP + 1) + 0.9476 * log(DOVEPrice) -1.4025 * log(REXONAPrice))
+
+test.data <- test.data %>%
+  mutate(predicted_sales = exp(1) ^ lnsales)
+
+test.data <- test.data %>%
+  mutate(se = (REXONASales - predicted_sales)^2)
+
+test.data <- test.data %>%
+  mutate(ape = abs((REXONASales - predicted_sales)/REXONASales))
+
+mape_test = sum(test.data$ape)/length(test.data$ape)
+mape_test
+
+rmse_test <- sqrt(sum(test.data$se)/length(test.data$se))
+rmse_test
+
+cor(test.data$REXONASales,test.data$predicted_sales)^2
 
 
 #Multicolinearity test 
@@ -431,6 +507,62 @@ MAPE(predictions,test.data$REXONASales)
 
 
 
-############  Range Constrainst 
-m2 = lm(log(1/(REXONASales+2))~log(1/(REXONADISP+2))+log(1/(REXONAFEAT+2))+log(1/(REXONADF+2))+log(1/(AXEDISP+2)),data1_scaled) #R2=0.62
+############  Range Constrainst
+m3 = lm(log(REXONASales)~ REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,train.data) #R2=0.77
+summary(m3)
+
+
+
+coefplot(m3, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+         ylab= "Variables",xlab= 'Association with Rexona market share')
+
+
+#Heterosedasticity test 
+gqtest(log(REXONASales)~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,data=train.data)
+
+
+
+train.data <- train.data %>%
+  mutate(lnsales_2 = -1.12278 + 0.75306 * REXONADISP -0.72086 * REXONAFEAT +
+           1.83470 * REXONADF -0.76310 * REXONAPrice + 0.51854* DOVEPrice -0.44669 * AXEDISP)
+
+
+train.data <- train.data %>%
+  mutate(predicted_sales_2 = exp(1)^lnsales_2)
+
+train.data <- train.data %>%
+  mutate(se_2 = (REXONASales - predicted_sales_2)^2)
+
+train.data <- train.data %>%
+  mutate(ape_2 = abs((REXONASales - predicted_sales_2)/REXONASales))
+
+mape_train_2 = sum(train.data$ape_2)/length(train.data$ape_2)
+mape_train_2
+
+rmse_train_2 <- sqrt(sum(train.data$se_2)/length(train.data$se_2))
+rmse_train_2
+
+cor(train.data$REXONASales,train.data$predicted_sales_2)^2
+
+
+test.data <- test.data %>%
+  mutate(lnsales_2 = -1.12278 + 0.75306 * REXONADISP -0.72086 * REXONAFEAT +
+           1.83470 * REXONADF -0.76310 * REXONAPrice + 0.51854* DOVEPrice -0.44669 * AXEDISP)
+
+test.data <- test.data %>%
+  mutate(predicted_sales_2 = exp(1) ^ lnsales_2)
+
+test.data <- test.data %>%
+  mutate(se_2 = (REXONASales - predicted_sales_2)^2)
+
+test.data <- test.data %>%
+  mutate(ape_2 = abs((REXONASales - predicted_sales_2)/REXONASales))
+
+mape_test_2 = sum(test.data$ape_2)/length(test.data$ape_2)
+mape_test_2
+
+rmse_test_2 <- sqrt(sum(test.data$se_2)/length(test.data$se_2))
+rmse_test_2
+
+cor(test.data$REXONASales,test.data$predicted_sales_2)^2
 
