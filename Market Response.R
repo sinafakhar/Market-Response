@@ -329,6 +329,9 @@ flattenCorrMatrix(cormat$r, cormat$P)
 
 corrplot(cor(market_share_albert[,3:10]),type= 'upper', method = 'number')
 
+
+library(lmtest)
+
 ############################## MODELS##########################################
 
 
@@ -370,7 +373,13 @@ data.frame(
 MAPE(predictions1,train.data$REXONASales)
 
 
+dwtest(m1)
+dwtest(m2)
+dwtest(m3)
 
+acf(m1$residuals)
+acf(m2$residuals)
+acf(m3$residuals)
 
 coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
          ylab= "Variables",xlab= 'Association with Rexona market share')
