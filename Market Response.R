@@ -99,7 +99,7 @@ data_total_n= data_total%>%dplyr:: select(c(-1,-2))
 data_total_nn=data_total%>%dplyr::select(c(1,2))
 data_total_percent= round(data_total_n/rowSums(data_total_n),2)
 data_share = cbind(data_total_nn,data_total_percent)
-View(data_share)  # This is market shares
+#View(data_share)  # This is market shares
 
 data_share%>%ggplot( aes(x=WEEK, y=REXONASales)) +
   geom_line()
@@ -117,22 +117,22 @@ data_share%>%filter(Chain=='SUPER DE BOER')%>%ggplot( aes(x=WEEK, y=REXONASales)
 
 ###### ODD NUMBERS
 odd_numbers= data_share%>% filter(REXONASales>0.4 |REXONASales<0.1 )
-View(odd_numbers)
+#View(odd_numbers)
 
 rexo_mean=mean(data$REXONASales)
 rexo_std= sd(data$REXONASales)
 odd_numbers= data%>% filter(REXONASales>rexo_mean+(3*(rexo_std)) |REXONASales< rexo_mean-(1*(rexo_std)))
-View(odd_numbers)
+#View(odd_numbers)
 
 rexo_mean=mean(data$REXONADISP)
 rexo_std= sd(data$REXONADISP)
 odd_numbers= data%>% filter(REXONADISP>rexo_mean+(3*(rexo_std)) |REXONADISP< rexo_mean-(1*(rexo_std)))
-View(odd_numbers)
+#View(odd_numbers)
 
 rexo_mean=mean(data$REXONAFEAT)
 rexo_std= sd(data$REXONAFEAT)
 odd_numbers= data%>% filter(REXONAFEAT>rexo_mean+(3*(rexo_std)) |REXONAFEAT< rexo_mean-(1*(rexo_std)))
-View(odd_numbers)
+#View(odd_numbers)
 
 
 
@@ -331,7 +331,7 @@ corrplot(cor(market_share_albert[,3:10]),type= 'upper', method = 'number')
 
 library(lmtest)
 
-############################## MODELS##########################################
+##############################Train-Test Split##########################################
 
 
 data1_log= log(data1[,c(-1,-2)])
@@ -345,6 +345,7 @@ gpairs(data1[3:10])
 gpairs(data1_log[2:9])
 gpairs(data1_scaled_log[1:8])
 
+
 #add new computed columns
 df = subset(data1,REXONARPrice !=0)
 
@@ -357,6 +358,22 @@ data1 = data1%>%
 data1 = data1%>%
   mutate(pricewar_dum = ifelse(data1$WEEK>56,1,0))
 
+library(Hmisc)
+data1 = data1%>%
+  mutate(L1REXONAPrice = Lag(data1$REXONAPrice, +1)) %>%
+  mutate(L2REXONAPrice = Lag(data1$REXONAPrice, +2)) %>%
+  mutate(L3REXONAPrice = Lag(data1$REXONAPrice, +3)) %>%
+  mutate(L4REXONAPrice = Lag(data1$REXONAPrice, +4)) %>%
+  mutate(L5REXONAPrice = Lag(data1$REXONAPrice, +5)) %>%
+  mutate(L6REXONAPrice = Lag(data1$REXONAPrice, +6)) %>%
+  mutate(L1REXONADF = Lag(data1$REXONADF, +1)) %>%
+  mutate(L2REXONADF = Lag(data1$REXONADF, +2)) %>%
+  mutate(L3REXONADF = Lag(data1$REXONADF, +3)) %>%
+  mutate(L4REXONADF = Lag(data1$REXONADF, +4)) %>%
+  mutate(L5REXONADF = Lag(data1$REXONADF, +5)) %>%
+  mutate(L6REXONADF = Lag(data1$REXONADF, +6)) %>%
+  mutate(L1REXONASales = Lag(data1$REXONASales, +1))
+  
 
 df2= data1[,c('WEEK','REXONARPrice','REXONAPrice','REXONADiscount')]
 # Split the data into training and test set
@@ -365,18 +382,20 @@ train.data  <- data1[1:100, ]
 test.data <- data1[101:124, ]
 chart.Correlation(train.data[,c(6,14,29,45,37,34,19)], histogram=TRUE, pch=19)  # Transforing is necessary 
 
+##################Models#####################################################
 
-#Model1
-m1 = lm(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONARPrice+DOVEPrice+AXEDISP+REXONADiscount,train.data) #R2=0.77
+###################----- Model1 - Linear Model-----##################
+m1 = lm(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONARPrice+
+          AXEDISP+REXONADiscount+pricewar_dum,train.data)
 summary(m1)
+coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+         ylab= "Variables",xlab= 'Association with Rexona market share')
 
 RSS <- c(crossprod(m1$residuals))
 
 MSE <- RSS / length(m1$residuals)
 
-  
 RMSE1 <- sqrt(MSE)
-
 
 sig2 <- RSS / m1$df.residual
 
@@ -389,25 +408,11 @@ data.frame(
 MAPE(predictions1,train.data$REXONASales)
 
 
-dwtest(m1)
-dwtest(m2)
-dwtest(m3)
-
-acf(m1$residuals)
-acf(m2$residuals)
-acf(m3$residuals)
-
-coefplot(m1, intercept= F,outerCI=1.96, lwdOuter = 1.5,
-         ylab= "Variables",xlab= 'Association with Rexona market share')
-plot(m1)
-
-colMeans( data[,colnames(data) %like% "AXE"])
-
 #Multicolinearity test 
 car::vif(m1)
   cormat<- rcorr(as.matrix(train.data[,c("REXONADISP","REXONAFEAT",
                                          'REXONADF','REXONAPrice',
-                                         'DOVEPrice','AXEDISP')]))  
+                                         'DOVEPrice','AXEDISP','REXONADiscount','pricewar_dum')]))
   flattenCorrMatrix <- function(cormat, pmat) {
     ut <- upper.tri(cormat)
     data.frame(
@@ -420,7 +425,7 @@ car::vif(m1)
   
   flattenCorrMatrix(cormat$r, cormat$P)
 #Heterosedasticity test 
-gqtest(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONARPrice+DOVEPrice+AXEDISP+pricewar_dum+REXONADiscount,data=train.data)  
+gqtest(REXONASales~REXONADISP+REXONAFEAT+REXONADF+REXONARPrice+AXEDISP+pricewar_dum+REXONADiscount,data=train.data)  
   
 bptest(m1)
 train.data$resi <- m1$residuals
@@ -433,24 +438,23 @@ data.frame(
 )
 MAPE(predictions,test.data$REXONASales)
 
+#############-------Model 2 --- Multiplicative model----####################
 
-
-
-#########Multiplicative model####################
-m2 = lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONARPrice)+log(pricewar_dum+1)+log(REXONADiscount+1),train.data) #R2=0.72
+L1REXONAPrice
+m2 = lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+
+        log(REXONARPrice)+log(pricewar_dum+1)+log(REXONADiscount+1),train.data)
 summary(m2)
 
-coefplot(m2, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+coefplot(m2, intercept= F,outerCI=1.75, lwdOuter = 1.5,
          ylab= "Variables",xlab= 'Association with Rexona market share')
 
 
 #Heterosedasticity test 
 gqtest(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONARPrice)+log(pricewar_dum+1)+log(REXONADiscount+1),data=train.data)
 
-
 train.data <- train.data %>%
-  mutate(lnsales = -0.6615 + 0.9098 * log(REXONADISP + 1) -1.0747 * log(REXONAFEAT + 1) +
-           2.2615 * log(REXONADF + 1) -0.5158 * log(AXEDISP + 1) + 0.5884 * log(DOVEPrice) -1.6773 * log(REXONARPrice)+-0.2713*log(pricewar_dum+1)+2.5061*log(REXONADiscount+1))
+  mutate(lnsales = -0.04921 + 0.86855 * log(REXONADISP + 1) -1.07631 * log(REXONAFEAT + 1) +
+           2.27172 * log(REXONADF + 1) -0.52059 * log(AXEDISP + 1) -1.64975 * log(REXONARPrice)-0.56985 *log(pricewar_dum+1)+2.56600 *log(REXONADiscount+1))
 
 train.data <- train.data %>%
   mutate(predicted_sales = exp(1) ^ lnsales)
@@ -471,8 +475,8 @@ cor(train.data$REXONASales,train.data$predicted_sales)^2
 
 
 test.data <- test.data %>%
-  mutate(lnsales = -0.6615 + 0.9098 * log(REXONADISP + 1) -1.0747 * log(REXONAFEAT + 1) +
-           2.2615 * log(REXONADF + 1) -0.5158 * log(AXEDISP + 1) + 0.5884 * log(DOVEPrice) -1.6773 * log(REXONARPrice)+-0.2713*log(pricewar_dum+1)+2.5061*log(REXONADiscount+1))
+  mutate(lnsales = -0.04921 + 0.86855 * log(REXONADISP + 1) -1.07631 * log(REXONAFEAT + 1) +
+           2.27172 * log(REXONADF + 1) -0.52059 * log(AXEDISP + 1) -1.64975 * log(REXONARPrice)-0.56985 *log(pricewar_dum+1)+2.56600 *log(REXONADiscount+1))
 
 test.data <- test.data %>%
   mutate(predicted_sales = exp(1) ^ lnsales)
@@ -509,34 +513,26 @@ flattenCorrMatrix <- function(cormat, pmat) {
 
 flattenCorrMatrix(cormat$r, cormat$P)
 #Heterosedasticity test 
-gqtest(lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONAPrice),train.data)) 
+gqtest(lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(REXONAPrice),train.data))
 
 
 
-
-
-
-
-
-
-############  Range Constrainst
-m3 = lm(log(REXONASales/(1-REXONASales))~ REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP+pricewar_dum,train.data) #R2=0.77
+############ Model3 -  Range Constrainst##########################
+m3 = lm(log(REXONASales/(1-REXONASales))~ REXONADISP+REXONAFEAT+REXONADF+REXONARPrice+
+          AXEDISP+REXONADiscount+pricewar_dum,train.data)
 summary(m3)
 
 
-
-coefplot(m3, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+coefplot(m3, intercept= F,outerCI=1.8, lwdOuter = 1.5,
          ylab= "Variables",xlab= 'Association with Rexona market share')
 
 
 #Heterosedasticity test 
 gqtest(log(REXONASales)~REXONADISP+REXONAFEAT+REXONADF+REXONAPrice+DOVEPrice+AXEDISP,data=train.data)
 
-
-
 train.data <- train.data %>%
-  mutate(ln_salesprime = 0.6774 + 0.87259 * REXONADISP -0.5138 * REXONAFEAT +
-           2.5047 * REXONADF -1.1442 * REXONAPrice + 0.3451* DOVEPrice -0.6116 * AXEDISP-0.4268*pricewar_dum)
+  mutate(ln_salesprime = 1.2031 + 0.9416 * REXONADISP +
+           2.5404 * REXONADF -0.9709 * REXONAPrice -0.6151 * AXEDISP+3.4556 * REXONADiscount -0.6212 *pricewar_dum)
 
 
 train.data <- train.data %>%
@@ -561,8 +557,8 @@ cor(train.data$REXONASales,train.data$predicted_sales_2)^2
 
 
 test.data <- test.data %>%
-  mutate(lnsales_2 = -1.12278 + 0.75306 * REXONADISP -0.72086 * REXONAFEAT +
-           1.83470 * REXONADF -0.76310 * REXONAPrice + 0.51854* DOVEPrice -0.44669 * AXEDISP)
+  mutate(ln_salesprime = 1.2031 + 0.9416 * REXONADISP +
+           2.5404 * REXONADF -0.9709 * REXONAPrice -0.6151 * AXEDISP+3.4556 * REXONADiscount -0.6212 *pricewar_dum)
 
 test.data <- test.data %>%
   mutate(predicted_sales_2 = exp(1) ^ lnsales_2)
@@ -580,3 +576,102 @@ rmse_test_2 <- sqrt(sum(test.data$se_2)/length(test.data$se_2))
 rmse_test_2
 
 cor(test.data$REXONASales,test.data$predicted_sales_2)^2
+
+#####Durbin watson tests###########
+dwtest(m1)
+dwtest(m2)
+dwtest(m3)
+
+acf(m1$residuals)
+acf(m2$residuals)
+acf(m3$residuals)
+
+#######################-------Model 2 with dynamic variables-------########################
+m4 = lm(REXONASales~REXONADISP+REXONAFEAT+1+REXONADF+1+AXEDISP+1+
+        REXONARPrice+pricewar_dum+REXONADiscount +
+        L1REXONAPrice+L2REXONAPrice+
+        L1REXONADF+L2REXONADF,train.data)
+
+m4 = lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+
+          log(REXONARPrice)+log(pricewar_dum+1)+log(REXONADiscount+1) +
+          log(L1REXONAPrice)+ log(L2REXONAPrice) +
+          log(L1REXONADF+1)+log(L2REXONADF+1),train.data)
+
+summary(m4)
+
+coefplot(m4, intercept= F,outerCI=1.96, lwdOuter = 1.5,
+         ylab= "Variables",xlab= 'Association with Rexona market share')
+
+acf(m4$residuals)
+dwtest(m4)
+
+
+
+
+#Heterosedasticity test 
+gqtest(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(DOVEPrice)+log(REXONARPrice)+log(pricewar_dum+1)+log(REXONADiscount+1),data=train.data)
+
+train.data <- train.data %>%
+  mutate(lnsales = -0.04921 + 0.86855 * log(REXONADISP + 1) -1.07631 * log(REXONAFEAT + 1) +
+           2.27172 * log(REXONADF + 1) -0.52059 * log(AXEDISP + 1) -1.64975 * log(REXONARPrice)-0.56985 *log(pricewar_dum+1)+2.56600 *log(REXONADiscount+1))
+
+train.data <- train.data %>%
+  mutate(predicted_sales = exp(1) ^ lnsales)
+
+train.data <- train.data %>%
+  mutate(se = (REXONASales - predicted_sales)^2)
+
+train.data <- train.data %>%
+  mutate(ape = abs((REXONASales - predicted_sales)/REXONASales))
+
+mape_train = sum(train.data$ape)/length(train.data$ape)
+mape_train
+
+rmse_train <- sqrt(sum(train.data$se)/length(train.data$se))
+rmse_train
+
+cor(train.data$REXONASales,train.data$predicted_sales)^2
+
+
+test.data <- test.data %>%
+  mutate(lnsales = -0.04921 + 0.86855 * log(REXONADISP + 1) -1.07631 * log(REXONAFEAT + 1) +
+           2.27172 * log(REXONADF + 1) -0.52059 * log(AXEDISP + 1) -1.64975 * log(REXONARPrice)-0.56985 *log(pricewar_dum+1)+2.56600 *log(REXONADiscount+1))
+
+test.data <- test.data %>%
+  mutate(predicted_sales = exp(1) ^ lnsales)
+
+test.data <- test.data %>%
+  mutate(se = (REXONASales - predicted_sales)^2)
+
+test.data <- test.data %>%
+  mutate(ape = abs((REXONASales - predicted_sales)/REXONASales))
+
+mape_test = sum(test.data$ape)/length(test.data$ape)
+mape_test
+
+rmse_test <- sqrt(sum(test.data$se)/length(test.data$se))
+rmse_test
+
+cor(test.data$REXONASales,test.data$predicted_sales)^2
+
+
+#Multicolinearity test 
+car::vif(m2)
+cormat<- rcorr(as.matrix(train.data[,c("REXONADISP","REXONAFEAT",
+                                       'REXONADF','REXONAPrice',
+                                       'DOVEPrice','AXEDISP')]))  
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+  )
+}
+
+flattenCorrMatrix(cormat$r, cormat$P)
+#Heterosedasticity test 
+gqtest(lm(log(REXONASales)~log(REXONADISP+1)+log(REXONAFEAT+1)+log(REXONADF+1)+log(AXEDISP+1)+log(REXONAPrice),train.data))
+
+
